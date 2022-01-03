@@ -132,16 +132,14 @@ void main()
 
 const char rect_vertex_shader_source[] =
         R"(#version 330 core
+layout(location = 0) in vec3 pos;
 
-// Input vertex data, different for all executions of this shader.
-layout(location = 0) in vec3 vertexPosition_modelspace;
-
-// Output data ; will be interpolated for each fragment.
 out vec2 UV;
 
 void main(){
-	gl_Position =  vec4(vertexPosition_modelspace,1);
-	UV = (vertexPosition_modelspace.xy+vec2(1,1))/2.0;
+	gl_Position =  vec4(pos, 1);
+//	UV = (gl_Position.xy+vec2(1,1))/2.0;
+    UV = (gl_Position.xy + 1)/2.0;
 }
 )";
 
@@ -156,7 +154,8 @@ uniform sampler2D renderedTexture;
 uniform float time;
 
 void main(){
-    color = texture( renderedTexture, UV + 0.005*vec2( sin(time+1024.0*UV.x),cos(time+768.0*UV.y)) ).xyz;
+    color = texture(renderedTexture, UV).xyz;
+//    color = vec3(UV, 1.0);
 }
 )";
 
@@ -274,6 +273,8 @@ int main() try
     int width, height;
     SDL_GetWindowSize(window, &width, &height);
 
+    std::cout << width << ' ' << height << '\n';
+
     SDL_GLContext gl_context = SDL_GL_CreateContext(window);
     if (!gl_context)
         sdl2_fail("SDL_GL_CreateContext: ");
@@ -380,8 +381,8 @@ int main() try
     GLuint renderedTexture;
     glGenTextures(1, &renderedTexture);
     glBindTexture(GL_TEXTURE_2D, renderedTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, renderedTexture, 0);
@@ -460,6 +461,13 @@ int main() try
                         case SDL_WINDOWEVENT_RESIZED:
                             width = event.window.data1;
                             height = event.window.data2;
+
+                            glBindRenderbuffer(GL_RENDERBUFFER, depthrenderbuffer);
+                            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+
+                            glBindTexture(GL_TEXTURE_2D, renderedTexture);
+                            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+
                             glViewport(0, 0, width, height);
                             break;
                     }
