@@ -259,9 +259,11 @@ void save_texture(GLuint target, const char * const filename) {
     glGetTexLevelParameteriv(target, 0, GL_TEXTURE_WIDTH, &width);
     glGetTexLevelParameteriv(target, 0, GL_TEXTURE_HEIGHT, &height);
 
-    auto *img = new std::vector<char>(width * height * 4);
+    auto *img = new std::vector<char>(width * height*4);
 
     glGetTexImage(target, 0, GL_RGBA, GL_UNSIGNED_BYTE, img->data());
+
+    stbi_flip_vertically_on_write(true);
 
     stbi_write_png(filename, width, height, 4, img->data(), width*4);
 
