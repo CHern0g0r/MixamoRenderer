@@ -17,6 +17,11 @@
 #include <fstream>
 #include <sstream>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
+
 #define GLM_FORCE_SWIZZLE
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/vec3.hpp>
@@ -247,6 +252,24 @@ void eval_bone_transforms(std::vector<bone_pose> & bp, std::vector<std::vector<b
     }
 }
 
+void save_texture(GLuint target, const char * const filename) {
+
+    int width, height;
+
+    glGetTexLevelParameteriv(target, 0, GL_TEXTURE_WIDTH, &width);
+    glGetTexLevelParameteriv(target, 0, GL_TEXTURE_HEIGHT, &height);
+
+    auto *img = new std::vector<char>(width * height * 4);
+
+    glGetTexImage(target, 0, GL_RGBA, GL_UNSIGNED_BYTE, img->data());
+
+    stbi_write_png(filename, width, height, 4, img->data(), width*4);
+
+    std::cout << "Texture wrote " << filename << '\n';
+
+    delete img;
+}
+
 int main() try
 {
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
@@ -448,6 +471,8 @@ int main() try
 
     float model_rotation = 0.f;
 
+    bool save = false;
+
     bool running = true;
     while (running)
     {
@@ -497,6 +522,10 @@ int main() try
             model_rotation -= 3.f * dt;
         if (button_down[SDLK_RIGHT])
             model_rotation += 3.f * dt;
+
+        if (button_down[SDLK_p]){
+            save = true;
+        }
 
         glClearColor(0.8f, 0.8f, 1.f, 0.f);
 
@@ -563,6 +592,11 @@ int main() try
 
         glBindVertexArray(rect_vao);
         glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        if (save) {
+            save_texture(GL_TEXTURE_2D, "pict.png");
+            save = false;
+        }
 
         SDL_GL_SwapWindow(window);
     }
