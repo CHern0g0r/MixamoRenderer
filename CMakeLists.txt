@@ -24,7 +24,9 @@ add_subdirectory(glm)
 
 set(TARGET_NAME "${PROJECT_NAME}")
 
-add_executable(${TARGET_NAME} main.cpp)
+file (GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "src/*.cpp")
+
+add_executable(${TARGET_NAME} ${SOURCES})
 target_compile_definitions(${TARGET_NAME} PUBLIC
 	"PRACTICE_SOURCE_DIRECTORY=\"${CMAKE_CURRENT_SOURCE_DIR}\""
 )
@@ -32,6 +34,7 @@ target_include_directories(${TARGET_NAME} PUBLIC
 	"${SDL2_INCLUDE_DIRS}"
 	"${GLEW_INCLUDE_DIRS}"
 	"${OPENGL_INCLUDE_DIRS}"
+	"${PRACTICE_SOURCE_DIRECTORY}include/"
 )
 target_link_libraries(${TARGET_NAME} PUBLIC
 	glm
