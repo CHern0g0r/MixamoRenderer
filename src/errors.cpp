@@ -13,3 +13,7 @@ void glew_fail(std::string_view message, GLenum error)
 {
     throw std::runtime_error(to_string(message) + reinterpret_cast<const char *>(glewGetErrorString(error)));
 }
+
+void assimp_fail(std::string_view message){
+    throw std::runtime_error(to_string(message));
+}

@@ -35,9 +35,11 @@ target_include_directories(${TARGET_NAME} PUBLIC
 	"${GLEW_INCLUDE_DIRS}"
 	"${OPENGL_INCLUDE_DIRS}"
 	"${PRACTICE_SOURCE_DIRECTORY}include/"
+	assimp/include/
 )
 target_link_libraries(${TARGET_NAME} PUBLIC
 	glm
+	assimp
 	"${GLEW_LIBRARIES}"
 	"${SDL2_LIBRARIES}"
 	"${OPENGL_LIBRARIES}"

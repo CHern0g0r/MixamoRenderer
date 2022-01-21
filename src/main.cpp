@@ -15,12 +15,12 @@
 #include <map>
 #include <cmath>
 #include <fstream>
-#include <sstream>
 
 #include "shader_sources.h"
 #include "shader.h"
 #include "utils.h"
 #include "errors.h"
+#include "model.h"
 
 #define GLM_FORCE_SWIZZLE
 #define GLM_ENABLE_EXPERIMENTAL
@@ -266,6 +266,9 @@ int main() try
     GLuint texID = glGetUniformLocation(rect_program, "renderedTexture");
     GLuint timeID = glGetUniformLocation(rect_program, "time");
 
+    Model m;
+    std::string filepath("/home/chern0g0r/workspace/diploma/models/Taunt.dae");
+    m.load(filepath);
 
     static_assert(sizeof(vertex) == 28);
 

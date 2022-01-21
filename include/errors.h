@@ -13,4 +13,5 @@
 
 void sdl2_fail(std::string_view message);
 void glew_fail(std::string_view message, GLenum error);
+void assimp_fail(std::string_view message);
 #endif //MIXAMORENDERER_ERRORS_H
