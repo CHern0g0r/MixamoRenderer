@@ -3,7 +3,12 @@
 //
 
 #include "model.h"
+#include "glm/common.hpp"
 
+
+Model::Model() {
+    sumBbox = std::make_pair(glm::vec3(0.f), glm::vec3(0.f));
+}
 
 Model::~Model() {
     clear();
@@ -38,6 +43,12 @@ bool Model::initFromScene(const aiScene *pScene, const std::string &filepath) {
         const aiMesh* paiMesh = pScene->mMeshes[i];
         initMesh(i, paiMesh);
     }
+
+    initBboxes();
+
+    auto [vmin, vmax] = sumBbox;
+    std::cout << "Bbox: \n" << vmin.x << ' ' << vmin.y << ' ' << vmin.z << '\n';
+    std::cout << vmax.x << ' ' << vmax.y << ' ' << vmax.z << '\n';
 
     return initMaterials(pScene, filepath);
 }
@@ -74,11 +85,26 @@ void Model::initMesh(int index, const aiMesh *paiMesh) {
     std::cout << "Vertices: " << vertices.size() << '\n';
     std::cout << "Indices: " << indices.size() << '\n';
 
+
+    mEntries[index].initBbox(vertices);
+
     mEntries[index].init(vertices, indices);
 }
 
 bool Model::initMaterials(const aiScene *pScene, const std::string &filename) {
     return true;
+}
+
+void Model::initBboxes() {
+    glm::vec3 minV(mEntries[0].bbox.first);
+    glm::vec3 maxV(mEntries[0].bbox.second);
+    for (auto &m : mEntries) {
+        auto [v1, v2] = m.bbox;
+        minV = glm::min(v1, minV);
+        maxV = glm::max(v2, maxV);
+    }
+
+    sumBbox = std::make_pair(minV, maxV);
 }
 
 void Model::clear() {
@@ -111,4 +137,16 @@ bool Model::MeshEntry::init(const std::vector<Vertex> &vertices,
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * numIndices, indices.data(), GL_STATIC_DRAW);
 
     return false;
+}
+
+void Model::MeshEntry::initBbox(const std::vector<Vertex> &vertices) {
+    glm::vec3 minV(vertices[0].m_pos);
+    glm::vec3 maxV(vertices[0].m_pos);
+    for (auto v: vertices) {
+        glm::vec3 pos = v.m_pos;
+
+        minV = glm::min(minV, pos);
+        maxV = glm::max(maxV, pos);
+    }
+    bbox = std::make_pair(minV, maxV);
 }

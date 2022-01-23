@@ -45,7 +45,7 @@ struct Vertex{
 
 class Model {
 public:
-    Model() = default;
+    Model();
     ~Model();
     bool load(std::string &filepath);
 
@@ -55,6 +55,7 @@ private:
     bool initFromScene(const aiScene* pScene, const std::string & filepath);
     void initMesh(int index, const aiMesh* paiMesh);
     bool initMaterials(const aiScene* pScene, const std::string& filename);
+    void initBboxes();
     void clear();
 
     struct MeshEntry {
@@ -64,15 +65,21 @@ private:
         bool init(const std::vector<Vertex>& vertices,
                   const std::vector<unsigned int>& indices);
 
+        void initBbox(const std::vector<Vertex>& vertices);
+
         GLuint VB;
         GLuint IB;
         unsigned int numIndices;
         unsigned int mtlIndex;
+
+        std::pair<glm::vec3, glm::vec3> bbox;
     private:
+
         bool inited;
     };
 
     std::vector<MeshEntry> mEntries;
+    std::pair<glm::vec3, glm::vec3> sumBbox;
 //    std::vector<Texture*> mTextures;
 };
 
